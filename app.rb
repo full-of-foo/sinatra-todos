@@ -1,13 +1,18 @@
 # Require the bundler gem and then call Bundler.require to load in all gems
 # listed in Gemfile.
 require 'bundler'
-Bundler.require
+Bundler.require(:default, ENV['RACK_ENV'] || :development) if defined?(Bundler)
 # Reload app.js when changed
 require "sinatra/reloader" if development?
 
 
 # DB init
-DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")
+if development?
+  DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/development.db")
+elsif production?
+  DataMapper.setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/sinatra-todos')
+end
+
 
 # Models
 class Task
@@ -18,10 +23,8 @@ class Task
   property :completed_at, DateTime
   property :created_at, DateTime
 end
-# Finalize the DataMapper models.
-DataMapper.finalize
-# Tell DataMapper to update the database according to the definitions above.
-DataMapper.auto_upgrade!
+# Finalize and update
+DataMapper.finalize.auto_upgrade!
 
 
 get '/task/' do
