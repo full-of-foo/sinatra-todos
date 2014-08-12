@@ -27,6 +27,7 @@ end
 DataMapper.finalize.auto_upgrade!
 
 
+# Api
 get '/task/' do
   content_type :json
 
@@ -37,7 +38,7 @@ end
 post '/task/' do
   content_type :json
 
-  @task = Task.new(params)
+  @task = Task.new(permit_params)
   @task.save ? @task.to_json : halt(500)
 end
 
@@ -45,9 +46,9 @@ put '/task/:id' do
   content_type :json
 
   @task = Task.get(params[:id].to_i)
-  @task.update(params)
+  @task.update(permit_params)
 
-  @task.save ? @task.to_json : halt(500)
+  @task && @task.save ? @task.to_json : halt(500)
 end
 
 get '/task/:id' do
@@ -60,7 +61,12 @@ end
 delete '/task/:id' do
   content_type :json
 
-  Task.get(params[:id].to_i).destroy ? { success: "ok" }.to_json : halt(500)
+  @task = Task.get(params[:id].to_i)
+  @task && @task.destroy ? { success: "ok" }.to_json : halt(400)
+end
+
+def permit_params
+  params.select { |k, v| ["name", "completed_at"].include? k }
 end
 
 
