@@ -9,7 +9,7 @@ gem 'data_mapper'
 
 group :development do
   gem 'dm-sqlite-adapter'
- gem 'sqlite3'
+  gem 'sqlite3'
 end
 
 group :production do

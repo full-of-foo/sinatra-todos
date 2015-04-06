@@ -28,23 +28,22 @@ DataMapper.finalize.auto_upgrade!
 
 
 # Api
-get '/task/' do
+before '/task*' do
   content_type :json
+  response.headers["Access-Control-Allow-Origin"] = "*"
+end
 
+get '/task/' do
   @tasks = Task.all(order: :created_at.desc)
   @tasks.to_json
 end
 
 post '/task/' do
-  content_type :json
-
   @task = Task.new(permit_params)
   @task.save ? @task.to_json : halt(500)
 end
 
 put '/task/:id' do
-  content_type :json
-
   @task = Task.get(params[:id].to_i)
   @task.update(permit_params)
 
@@ -52,15 +51,11 @@ put '/task/:id' do
 end
 
 get '/task/:id' do
-  content_type :json
-
   @task = Task.get(params[:id].to_i)
   @task ? @task.to_json : halt(404)
 end
 
 delete '/task/:id' do
-  content_type :json
-
   @task = Task.get(params[:id].to_i)
   @task && @task.destroy ? { success: "ok" }.to_json : halt(400)
 end
